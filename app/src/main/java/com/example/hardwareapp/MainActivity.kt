@@ -25,70 +25,90 @@ import androidx.compose.foundation.clickable
 import com.example.hardwareapp.data.User
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.google.accompanist.pager.HorizontalPagerIndicator
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.pagerTabIndicatorOffset
-import com.google.accompanist.pager.HorizontalPagerIndicator
 import kotlinx.coroutines.launch
+import com.example.hardwareapp.data.ProductDao
+
+import kotlinx.coroutines.runBlocking
+
 
 class MainActivity : ComponentActivity() {
     private lateinit var userDao: UserDao
+    private lateinit var productDao: ProductDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Инициализация базы данных
         val db = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java,
             "app_database"
         ).build()
 
-        userDao = db.userDao() // Получаем экземпляр DAO
+        userDao = db.userDao()
+        productDao = db.productDao()
+
+        // Initialize the admin user
+        runBlocking {
+            val adminUser = userDao.getUserByUsername("admin")
+            if (adminUser == null) {
+                userDao.insert(User(username = "admin", password = "admin", isAdmin = true))
+            }
+        }
 
         setContent {
-            MainScreen(userDao) // Передаем userDao в основное Composable
+            MainScreen(userDao, productDao)
         }
     }
 }
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun MainScreen(userDao: UserDao) {
+fun MainScreen(userDao: UserDao, productDao: ProductDao) {
     var isLoggedIn by remember { mutableStateOf(false) }
     var isRegistration by remember { mutableStateOf(false) }
     var currentUser by remember { mutableStateOf<User?>(null) }
+    var isAddingProduct by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf("Видеокарты") }
 
-    val pagerState = rememberPagerState(initialPage = 0) // Состояние для pager'а
-    val coroutineScope = rememberCoroutineScope() // Для управления анимацией
+    val pagerState = rememberPagerState(initialPage = 0)
+    val coroutineScope = rememberCoroutineScope()
 
     if (isLoggedIn) {
         Scaffold(
             bottomBar = {
                 NavigationBar(selectedTab = pagerState.currentPage) { page ->
                     coroutineScope.launch {
-                        pagerState.animateScrollToPage(page) // Анимированный переход к выбранной вкладке
+                        pagerState.animateScrollToPage(page)
                     }
                 }
             }
         ) { paddingValues ->
-            // Горизонтальный пейджер для свайпов
             HorizontalPager(
-                count = 3, // У нас 3 вкладки
+                count = 3,
                 state = pagerState,
                 modifier = Modifier.padding(paddingValues)
             ) { page ->
                 when (page) {
-                    0 -> ComponentCatalogScreen()  // Каталог
-                    1 -> CartScreen()              // Корзина
+                    0 -> ComponentCatalogScreen(onCategoryClick = { category ->
+                        selectedCategory = category
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(1)
+                        }
+                    })
+                    1 -> CategoryProductsScreen(category = selectedCategory, productDao = productDao)
                     2 -> currentUser?.let { user ->
-                        UserProfileScreen(user = user, onLogout = {
-                            isLoggedIn = false
-                            currentUser = null
-                        })
+                        UserProfileScreen(
+                            user = user,
+                            onLogout = {
+                                isLoggedIn = false
+                                currentUser = null
+                            },
+                            onAddProductClick = {
+                                isAddingProduct = true
+                            }
+                        )
                     }
                 }
             }
@@ -116,29 +136,50 @@ fun MainScreen(userDao: UserDao) {
             )
         }
     }
+
+    if (isAddingProduct) {
+        AddProductScreen(
+            onProductAdded = {
+                isAddingProduct = false
+            },
+            productDao = productDao
+        )
+    }
 }
 
 @Composable
-fun ComponentCatalogScreen(modifier: Modifier = Modifier) {
+fun ComponentCatalogScreen(onCategoryClick: (String) -> Unit, modifier: Modifier = Modifier) {
+    val categories = listOf(
+        "Видеокарты",
+        "Процессоры",
+        "Материнские платы",
+        "Оперативная память",
+        "Блоки питания",
+        "Корпуса",
+        "Системы охлаждения",
+        "SSD",
+        "Жесткие диски"
+    )
+
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier.fillMaxSize()
     ) {
-        items(componentCategories.size) { index ->
-            CategoryCard(category = componentCategories[index])
+        items(categories.size) { index ->
+            CategoryCard(category = categories[index], onClick = { onCategoryClick(categories[index]) })
         }
     }
 }
 
 @Composable
-fun CategoryCard(category: ComponentCategory) {
+fun CategoryCard(category: String, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .clickable { /* Обработка нажатия на категорию */ },
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
@@ -147,7 +188,7 @@ fun CategoryCard(category: ComponentCategory) {
             modifier = Modifier.fillMaxSize()
         ) {
             Text(
-                text = category.name,
+                text = category,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(16.dp)
             )
@@ -201,7 +242,7 @@ val componentCategories = listOf(
     ComponentCategory("Оперативная память"),
     ComponentCategory("Блоки питания"),
     ComponentCategory("Корпуса"),
-    ComponentCategory("Системы охлаждения"),  // Новая категория
-    ComponentCategory("SSD"),                // Новая категория
-    ComponentCategory("Жесткие диски")       // Новая категория
+    ComponentCategory("Системы охлаждения"),
+    ComponentCategory("SSD"),
+    ComponentCategory("Жесткие диски")
 )

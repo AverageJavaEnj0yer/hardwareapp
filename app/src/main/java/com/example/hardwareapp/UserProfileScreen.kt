@@ -8,34 +8,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.hardwareapp.data.User
 import androidx.compose.foundation.shape.RoundedCornerShape
-
 import androidx.compose.foundation.background
 
 @Composable
-fun UserProfileScreen(user: User, onLogout: () -> Unit, modifier: Modifier = Modifier) {
+fun UserProfileScreen(
+    user: User,
+    onLogout: () -> Unit,
+    onAddProductClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp) // Используем равномерное расстояние между элементами
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text("Профиль пользователя", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Картинка профиля (можно использовать текст для представления пользователя)
         Box(
             modifier = Modifier
-                .size(100.dp) // Размер аватара
+                .size(100.dp)
                 .background(
-                    shape = RoundedCornerShape(12.dp), // Закругленные углы
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) // Фон аватара
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                 ),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = user.username.first().toString(), // Отображаем первую букву имени пользователя
+                text = user.username.first().toString(),
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -43,7 +46,6 @@ fun UserProfileScreen(user: User, onLogout: () -> Unit, modifier: Modifier = Mod
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Информация о пользователе
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
@@ -65,7 +67,12 @@ fun UserProfileScreen(user: User, onLogout: () -> Unit, modifier: Modifier = Mod
         Spacer(modifier = Modifier.height(16.dp))
 
         Text("История заказов:", style = MaterialTheme.typography.titleMedium)
-        // Здесь можно добавить отображение истории заказов, когда она будет готова
+
+        if (user.isAdmin) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onAddProductClick) {
+                Text("Добавить товар")
+            }
+        }
     }
 }
-

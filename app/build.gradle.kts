@@ -57,7 +57,6 @@ android {
         freeCompilerArgs += "-X room.schemaLocation=${projectDir}/schemas"
     }
 }
-
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -82,6 +81,4 @@ dependencies {
     implementation(libs.androidx.room.runtime) // Основная зависимость Room
     implementation(libs.androidx.room.ktx) // Зависимость для корутин
     ksp(libs.androidx.room.compiler) // Используйте ksp вместо kapt
-
-
 }
