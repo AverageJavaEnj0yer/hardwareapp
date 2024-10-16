@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
+import com.example.hardwareapp.data.User
 
 class MainActivity : ComponentActivity() {
     private lateinit var userDao: UserDao
@@ -40,47 +41,67 @@ class MainActivity : ComponentActivity() {
         userDao = db.userDao() // Получаем экземпляр DAO
 
         setContent {
-            var isLoggedIn by remember { mutableStateOf(false) }
-            var isRegistration by remember { mutableStateOf(false) } // Состояние для экрана регистрации
-            var selectedTab by remember { mutableStateOf("home") }
+            MainScreen(userDao) // Передаем userDao в основное Composable
+        }
+    }
+}
 
-            if (isLoggedIn) {
-                // Показать главный экран после успешной авторизации
-                Scaffold(
-                    bottomBar = {
-                        NavigationBar(selectedTab = selectedTab) { tab ->
-                            selectedTab = tab
-                        }
-                    }
-                ) { paddingValues ->
-                    when (selectedTab) {
-                        "home" -> ComponentCatalogScreen(modifier = Modifier.padding(paddingValues))
-                        "cart" -> CartScreen(modifier = Modifier.padding(paddingValues))
-                        "profile" -> ProfileScreen(modifier = Modifier.padding(paddingValues))
-                    }
-                }
-            } else {
-                if (isRegistration) {
-                    // Показать экран регистрации
-                    RegistrationScreen(
-                        onRegistrationSuccess = {
-                            isRegistration = false // Возвращение к экрану авторизации после успешной регистрации
-                        },
-                        onCancelClick = {
-                            isRegistration = false // Возвращение к экрану авторизации при отмене
-                        },
-                        userDao = userDao
-                    )
-                } else {
-                    // Показать экран авторизации
-                    AuthorizationScreen(
-                        onLoginSuccess = { isLoggedIn = true },
-                        onRegisterClick = { isRegistration = true }, // Переход на экран регистрации
-                        userDao = userDao // Передаем UserDao в AuthorizationScreen
-                    )
-                }
+@Composable
+fun MainScreen(userDao: UserDao) {
+    var isLoggedIn by remember { mutableStateOf(false) }
+    var isRegistration by remember { mutableStateOf(false) } // Состояние для экрана регистрации
+    var selectedTab by remember { mutableStateOf("home") }
+    var currentUser by remember { mutableStateOf<User?>(null) } // Состояние для текущего пользователя
 
+    if (isLoggedIn) {
+        // Показать главный экран после успешной авторизации
+        Scaffold(
+            bottomBar = {
+                NavigationBar(selectedTab = selectedTab) { tab ->
+                    selectedTab = tab
+                }
             }
+        ) { paddingValues ->
+            when (selectedTab) {
+                "home" -> ComponentCatalogScreen(modifier = Modifier.padding(paddingValues))
+                "cart" -> CartScreen(modifier = Modifier.padding(paddingValues))
+                "profile" -> {
+                    if (currentUser != null) {
+                        UserProfileScreen(
+                            user = currentUser!!,
+                            onLogout = {
+                                isLoggedIn = false
+                                currentUser = null // Сброс текущего пользователя при выходе
+                            },
+                            modifier = Modifier.padding(paddingValues)
+                        )
+                    }
+                }
+            }
+        }
+    } else {
+        if (isRegistration) {
+            // Показать экран регистрации
+            RegistrationScreen(
+                onRegistrationSuccess = { newUser ->
+                    currentUser = newUser // Получение нового пользователя
+                    isRegistration = false // Возвращение к экрану авторизации после успешной регистрации
+                },
+                onCancelClick = {
+                    isRegistration = false // Возвращение к экрану авторизации при отмене
+                },
+                userDao = userDao
+            )
+        } else {
+            // Показать экран авторизации
+            AuthorizationScreen(
+                onLoginSuccess = { user ->
+                    isLoggedIn = true
+                    currentUser = user // Получение текущего пользователя после успешного входа
+                },
+                onRegisterClick = { isRegistration = true }, // Переход на экран регистрации
+                userDao = userDao // Передаем UserDao в AuthorizationScreen
+            )
         }
     }
 }
@@ -150,18 +171,6 @@ fun NavigationBar(selectedTab: String, onTabSelected: (String) -> Unit) {
 fun CartScreen(modifier: Modifier = Modifier) {
     Text(
         text = "Корзина пока пуста",
-        modifier = modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center),
-        textAlign = TextAlign.Center,
-        fontSize = 20.sp
-    )
-}
-
-@Composable
-fun ProfileScreen(modifier: Modifier = Modifier) {
-    Text(
-        text = "Профиль пользователя",
         modifier = modifier
             .fillMaxSize()
             .wrapContentSize(Alignment.Center),

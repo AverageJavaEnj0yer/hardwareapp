@@ -7,11 +7,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.hardwareapp.data.User
 import com.example.hardwareapp.data.UserDao
 import kotlinx.coroutines.launch
 
 @Composable
-fun RegistrationScreen(onRegistrationSuccess: () -> Unit, onCancelClick: () -> Unit, userDao: UserDao) {
+fun RegistrationScreen(
+    onRegistrationSuccess: (User) -> Unit,
+    onCancelClick: () -> Unit,
+    userDao: UserDao
+) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -49,8 +54,10 @@ fun RegistrationScreen(onRegistrationSuccess: () -> Unit, onCancelClick: () -> U
                     if (existingUser != null) {
                         errorMessage = "Пользователь с таким именем уже существует"
                     } else {
-                        userDao.insert(User(username = username, password = password))
-                        onRegistrationSuccess() // Успешная регистрация
+                        // Создание нового пользователя с уникальным ID
+                        val newUser = User(username = username, password = password) // ID будет сгенерирован автоматически
+                        userDao.insert(newUser)
+                        onRegistrationSuccess(newUser) // Успешная регистрация с передачей нового пользователя
                     }
                 }
             }
@@ -68,4 +75,3 @@ fun RegistrationScreen(onRegistrationSuccess: () -> Unit, onCancelClick: () -> U
         }
     }
 }
-

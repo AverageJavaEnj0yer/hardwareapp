@@ -19,6 +19,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Отключение экспорта схемы, если не требуется
+        // exportSchema = false
     }
 
     buildTypes {
@@ -48,6 +51,11 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    // Настройки для Room
+    kotlinOptions {
+        freeCompilerArgs += "-X room.schemaLocation=${projectDir}/schemas"
+    }
 }
 
 dependencies {
@@ -71,5 +79,6 @@ dependencies {
     implementation(libs.androidx.room.runtime) // Основная зависимость Room
     implementation(libs.androidx.room.ktx) // Зависимость для корутин
     ksp(libs.androidx.room.compiler) // Используйте ksp вместо kapt
+
 
 }

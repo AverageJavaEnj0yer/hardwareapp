@@ -9,11 +9,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.hardwareapp.data.UserDao
 import kotlinx.coroutines.launch
+import com.example.hardwareapp.data.User
 
 @Composable
 fun AuthorizationScreen(
-    onLoginSuccess: () -> Unit,
-    onRegisterClick: () -> Unit, // Переход на экран регистрации
+    onLoginSuccess: (User) -> Unit,
+    onRegisterClick: () -> Unit,
     userDao: UserDao
 ) {
     var username by remember { mutableStateOf("") }
@@ -54,7 +55,7 @@ fun AuthorizationScreen(
                     // Используем корректный метод для проверки пользователя
                     val user = userDao.getUserByUsername(username)
                     if (user != null && user.password == password) {
-                        onLoginSuccess() // Успешная авторизация
+                        onLoginSuccess(user) // Успешная авторизация
                     } else {
                         errorMessage = "Неверное имя пользователя или пароль"
                     }
