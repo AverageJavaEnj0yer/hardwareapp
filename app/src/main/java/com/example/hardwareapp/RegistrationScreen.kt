@@ -11,11 +11,11 @@ import com.example.hardwareapp.data.UserDao
 import kotlinx.coroutines.launch
 
 @Composable
-fun RegistrationScreen(onRegistrationSuccess: () -> Unit, userDao: UserDao) {
+fun RegistrationScreen(onRegistrationSuccess: () -> Unit, onCancelClick: () -> Unit, userDao: UserDao) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-    val coroutineScope = rememberCoroutineScope() // Создаем корутинный скоуп
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -26,7 +26,6 @@ fun RegistrationScreen(onRegistrationSuccess: () -> Unit, userDao: UserDao) {
     ) {
         Text("Регистрация", style = MaterialTheme.typography.headlineMedium)
 
-        // Поля для ввода логина и пароля
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
@@ -45,10 +44,8 @@ fun RegistrationScreen(onRegistrationSuccess: () -> Unit, userDao: UserDao) {
             if (username.isEmpty() || password.isEmpty()) {
                 errorMessage = "Пожалуйста, введите имя пользователя и пароль"
             } else {
-                // Запускаем корутину
                 coroutineScope.launch {
-                    // Проверка на уникальность имени пользователя
-                    val existingUser = userDao.getUserByUsernameAndPassword(username, password)
+                    val existingUser = userDao.getUserByUsername(username)
                     if (existingUser != null) {
                         errorMessage = "Пользователь с таким именем уже существует"
                     } else {
@@ -61,9 +58,14 @@ fun RegistrationScreen(onRegistrationSuccess: () -> Unit, userDao: UserDao) {
             Text("Зарегистрироваться")
         }
 
+        Button(onClick = { onCancelClick() }) {
+            Text("Отмена")
+        }
+
         if (errorMessage.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
         }
     }
 }
+

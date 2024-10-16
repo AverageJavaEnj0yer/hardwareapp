@@ -62,7 +62,15 @@ class MainActivity : ComponentActivity() {
             } else {
                 if (isRegistration) {
                     // Показать экран регистрации
-                    RegistrationScreen(onRegistrationSuccess = { isLoggedIn = true }, userDao = userDao)
+                    RegistrationScreen(
+                        onRegistrationSuccess = {
+                            isRegistration = false // Возвращение к экрану авторизации после успешной регистрации
+                        },
+                        onCancelClick = {
+                            isRegistration = false // Возвращение к экрану авторизации при отмене
+                        },
+                        userDao = userDao
+                    )
                 } else {
                     // Показать экран авторизации
                     AuthorizationScreen(
@@ -71,6 +79,7 @@ class MainActivity : ComponentActivity() {
                         userDao = userDao // Передаем UserDao в AuthorizationScreen
                     )
                 }
+
             }
         }
     }
