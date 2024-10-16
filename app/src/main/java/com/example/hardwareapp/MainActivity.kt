@@ -23,6 +23,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
 import com.example.hardwareapp.data.User
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.pager.HorizontalPagerIndicator
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.pagerTabIndicatorOffset
+import com.google.accompanist.pager.HorizontalPagerIndicator
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private lateinit var userDao: UserDao
@@ -46,61 +55,64 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun MainScreen(userDao: UserDao) {
     var isLoggedIn by remember { mutableStateOf(false) }
-    var isRegistration by remember { mutableStateOf(false) } // Состояние для экрана регистрации
-    var selectedTab by remember { mutableStateOf("home") }
-    var currentUser by remember { mutableStateOf<User?>(null) } // Состояние для текущего пользователя
+    var isRegistration by remember { mutableStateOf(false) }
+    var currentUser by remember { mutableStateOf<User?>(null) }
+
+    val pagerState = rememberPagerState(initialPage = 0) // Состояние для pager'а
+    val coroutineScope = rememberCoroutineScope() // Для управления анимацией
 
     if (isLoggedIn) {
-        // Показать главный экран после успешной авторизации
         Scaffold(
             bottomBar = {
-                NavigationBar(selectedTab = selectedTab) { tab ->
-                    selectedTab = tab
+                NavigationBar(selectedTab = pagerState.currentPage) { page ->
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(page) // Анимированный переход к выбранной вкладке
+                    }
                 }
             }
         ) { paddingValues ->
-            when (selectedTab) {
-                "home" -> ComponentCatalogScreen(modifier = Modifier.padding(paddingValues))
-                "cart" -> CartScreen(modifier = Modifier.padding(paddingValues))
-                "profile" -> {
-                    if (currentUser != null) {
-                        UserProfileScreen(
-                            user = currentUser!!,
-                            onLogout = {
-                                isLoggedIn = false
-                                currentUser = null // Сброс текущего пользователя при выходе
-                            },
-                            modifier = Modifier.padding(paddingValues)
-                        )
+            // Горизонтальный пейджер для свайпов
+            HorizontalPager(
+                count = 3, // У нас 3 вкладки
+                state = pagerState,
+                modifier = Modifier.padding(paddingValues)
+            ) { page ->
+                when (page) {
+                    0 -> ComponentCatalogScreen()  // Каталог
+                    1 -> CartScreen()              // Корзина
+                    2 -> currentUser?.let { user ->
+                        UserProfileScreen(user = user, onLogout = {
+                            isLoggedIn = false
+                            currentUser = null
+                        })
                     }
                 }
             }
         }
     } else {
         if (isRegistration) {
-            // Показать экран регистрации
             RegistrationScreen(
                 onRegistrationSuccess = { newUser ->
-                    currentUser = newUser // Получение нового пользователя
-                    isRegistration = false // Возвращение к экрану авторизации после успешной регистрации
+                    currentUser = newUser
+                    isRegistration = false
                 },
                 onCancelClick = {
-                    isRegistration = false // Возвращение к экрану авторизации при отмене
+                    isRegistration = false
                 },
                 userDao = userDao
             )
         } else {
-            // Показать экран авторизации
             AuthorizationScreen(
                 onLoginSuccess = { user ->
                     isLoggedIn = true
-                    currentUser = user // Получение текущего пользователя после успешного входа
+                    currentUser = user
                 },
-                onRegisterClick = { isRegistration = true }, // Переход на экран регистрации
-                userDao = userDao // Передаем UserDao в AuthorizationScreen
+                onRegisterClick = { isRegistration = true },
+                userDao = userDao
             )
         }
     }
@@ -144,28 +156,29 @@ fun CategoryCard(category: ComponentCategory) {
 }
 
 @Composable
-fun NavigationBar(selectedTab: String, onTabSelected: (String) -> Unit) {
+fun NavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     NavigationBar {
         NavigationBarItem(
-            selected = selectedTab == "home",
-            onClick = { onTabSelected("home") },
+            selected = selectedTab == 0,
+            onClick = { onTabSelected(0) },
             label = { Text("Каталог") },
             icon = { Icon(Icons.Filled.Home, contentDescription = null) }
         )
         NavigationBarItem(
-            selected = selectedTab == "cart",
-            onClick = { onTabSelected("cart") },
+            selected = selectedTab == 1,
+            onClick = { onTabSelected(1) },
             label = { Text("Корзина") },
             icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = null) }
         )
         NavigationBarItem(
-            selected = selectedTab == "profile",
-            onClick = { onTabSelected("profile") },
+            selected = selectedTab == 2,
+            onClick = { onTabSelected(2) },
             label = { Text("Профиль") },
             icon = { Icon(Icons.Filled.Person, contentDescription = null) }
         )
     }
 }
+
 
 @Composable
 fun CartScreen(modifier: Modifier = Modifier) {
