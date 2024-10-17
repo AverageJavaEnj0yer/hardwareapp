@@ -40,6 +40,7 @@ fun CartScreen(
 
     val orangeColor = Color(0xFFFFA500) // Определение оранжевого цвета
     val totalPrice = cartItems.sumOf { it.price }
+    val formattedTotalPrice = String.format("%.2f", totalPrice)
 
     Column(
         modifier = Modifier
@@ -53,24 +54,30 @@ fun CartScreen(
         if (cartItems.isEmpty()) {
             Text("Корзина пуста", style = MaterialTheme.typography.bodyMedium)
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
             ) {
-                items(cartItems) { product ->
-                    CartItem(product = product, onRemoveFromCart = {
-                        coroutineScope.launch {
-                            userDao.removeFromCart(currentUser.id, product.id)
-                            cartItems = userDao.getCartProducts(currentUser.id)
-                        }
-                    })
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(cartItems) { product ->
+                        CartItem(product = product, onRemoveFromCart = {
+                            coroutineScope.launch {
+                                userDao.removeFromCart(currentUser.id, product.id)
+                                cartItems = userDao.getCartProducts(currentUser.id)
+                            }
+                        })
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Итого: ${totalPrice} BYN", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
+            Text("Итого: $formattedTotalPrice BYN", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -110,7 +117,7 @@ fun CartItem(product: Product, onRemoveFromCart: (Product) -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(text = product.name, style = MaterialTheme.typography.titleMedium)
-                Text(text = "${product.price} BYN", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
+                Text(text = String.format("%.2f", product.price) + " BYN", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
             }
             IconButton(onClick = { onRemoveFromCart(product) }) {
                 Icon(Icons.Filled.Delete, contentDescription = "Remove from cart")

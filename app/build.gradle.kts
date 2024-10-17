@@ -57,6 +57,7 @@ android {
         freeCompilerArgs += "-X room.schemaLocation=${projectDir}/schemas"
     }
 }
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -77,10 +78,13 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:0.31.3-beta")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.31.3-beta")
 
-    implementation ("io.coil-kt:coil-compose:2.1.0")
+    implementation("io.coil-kt:coil-compose:2.1.0")
 
     // Зависимости Room
     implementation(libs.androidx.room.runtime) // Основная зависимость Room
     implementation(libs.androidx.room.ktx) // Зависимость для корутин
     ksp(libs.androidx.room.compiler) // Используйте ksp вместо kapt
+
+    // Зависимость org.json
+    implementation(libs.org.json)
 }

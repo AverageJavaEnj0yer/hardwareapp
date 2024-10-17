@@ -21,6 +21,7 @@ import com.example.hardwareapp.data.UserDao
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
+import org.json.JSONObject
 
 
 
@@ -134,6 +135,11 @@ fun OrderItem(order: Order) {
     val formattedDate = dateFormat.format(order.timestamp)
     var showDetails by remember { mutableStateOf(false) }
 
+    val orderDetails = JSONObject(order.orderDetails)
+    val userId = orderDetails.getInt("userId")
+    val username = orderDetails.getString("username")
+    val items = orderDetails.getJSONObject("items")
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -147,10 +153,15 @@ fun OrderItem(order: Order) {
         ) {
             Text("Заказ №${order.id}", style = MaterialTheme.typography.titleMedium)
             Text("Дата: $formattedDate", style = MaterialTheme.typography.bodyMedium)
-            Text("Общая стоимость: ${order.totalPrice} BYN", style = MaterialTheme.typography.bodyMedium)
+            Text("Общая стоимость: ${String.format("%.2f", order.totalPrice)} BYN", style = MaterialTheme.typography.bodyMedium)
 
             if (showDetails) {
-                Text("Детали заказа: ${order.orderDetails}", style = MaterialTheme.typography.bodyMedium)
+                Text("Пользователь: $username (ID: $userId)", style = MaterialTheme.typography.bodyMedium)
+                Text("Товары:", style = MaterialTheme.typography.bodyMedium)
+                items.keys().forEach { key ->
+                    val price = items.getDouble(key)
+                    Text("$key: ${String.format("%.2f", price)} BYN", style = MaterialTheme.typography.bodyMedium)
+                }
             }
 
             Button(

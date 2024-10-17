@@ -67,7 +67,11 @@ fun CheckoutScreen(
                         val orderDetails = JSONObject().apply {
                             put("userId", currentUser.id)
                             put("username", currentUser.username)
-                            put("items", cartItems.map { it.name to it.price }.toMap())
+                            val itemsJson = JSONObject()
+                            cartItems.forEach { product ->
+                                itemsJson.put(product.name, product.price)
+                            }
+                            put("items", itemsJson)
                         }.toString()
 
                         val totalPrice = cartItems.sumOf { it.price }
