@@ -79,6 +79,7 @@ fun CheckoutScreen(
                         )
 
                         userDao.insertOrder(order)
+                        userDao.clearCart(currentUser.id)
                         onCheckoutComplete()
                     }
                 }

@@ -22,6 +22,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+
+
 @Composable
 fun UserProfileScreen(
     userDao: UserDao,
@@ -130,6 +132,7 @@ fun UserProfileScreen(
 fun OrderItem(order: Order) {
     val dateFormat = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault())
     val formattedDate = dateFormat.format(order.timestamp)
+    var showDetails by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -145,7 +148,17 @@ fun OrderItem(order: Order) {
             Text("Заказ №${order.id}", style = MaterialTheme.typography.titleMedium)
             Text("Дата: $formattedDate", style = MaterialTheme.typography.bodyMedium)
             Text("Общая стоимость: ${order.totalPrice} BYN", style = MaterialTheme.typography.bodyMedium)
-            Text("Детали заказа: ${order.orderDetails}", style = MaterialTheme.typography.bodyMedium)
+
+            if (showDetails) {
+                Text("Детали заказа: ${order.orderDetails}", style = MaterialTheme.typography.bodyMedium)
+            }
+
+            Button(
+                onClick = { showDetails = !showDetails },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(if (showDetails) "Скрыть" else "Подробнее")
+            }
         }
     }
 }

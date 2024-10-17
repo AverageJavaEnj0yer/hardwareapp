@@ -31,6 +31,9 @@ interface UserDao {
     @Query("DELETE FROM cart WHERE userId = :userId AND productId = :productId")
     suspend fun removeFromCart(userId: Int, productId: Int)
 
+    @Query("DELETE FROM cart WHERE userId = :userId")
+    suspend fun clearCart(userId: Int)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrder(order: Order)
 

@@ -220,6 +220,7 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
         }
     }
 }
+
 @Composable
 fun ComponentCatalogScreen(onCategoryClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val categories = listOf(
