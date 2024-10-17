@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.hardwareapp.data.Product
@@ -20,7 +21,6 @@ import androidx.compose.material.icons.filled.Delete
 import com.example.hardwareapp.data.UserDao
 import com.example.hardwareapp.data.User
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun CartScreen(
@@ -41,6 +41,9 @@ fun CartScreen(
     val orangeColor = Color(0xFFFFA500) // Определение оранжевого цвета
     val totalPrice = cartItems.sumOf { it.price }
     val formattedTotalPrice = String.format("%.2f", totalPrice)
+
+    val configuration = LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp > 600
 
     Column(
         modifier = Modifier
@@ -94,6 +97,9 @@ fun CartScreen(
 
 @Composable
 fun CartItem(product: Product, onRemoveFromCart: (Product) -> Unit) {
+    val configuration = LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp > 600
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -108,7 +114,7 @@ fun CartItem(product: Product, onRemoveFromCart: (Product) -> Unit) {
             AsyncImage(
                 model = product.imageUrl,
                 contentDescription = null,
-                modifier = Modifier.size(80.dp)
+                modifier = Modifier.size(if (isTablet) 120.dp else 80.dp)
             )
             Column(
                 modifier = Modifier

@@ -1,5 +1,6 @@
 package com.example.hardwareapp
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.example.hardwareapp.data.Product
 import com.example.hardwareapp.data.ProductDao
@@ -18,7 +20,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import coil.compose.AsyncImage
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 
@@ -39,6 +40,9 @@ fun CategoryProductsScreen(
             products = productDao.getProductsByCategory(category)
         }
     }
+
+    val configuration = LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp > 600
 
     Column(
         modifier = Modifier
@@ -64,14 +68,14 @@ fun CategoryProductsScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(products) { product ->
-                ProductItem(product = product, onProductClick = onProductClick, onAddToCart = onAddToCart, isInCart = cartItems.contains(product))
+                ProductItem(product = product, onProductClick = onProductClick, onAddToCart = onAddToCart, isInCart = cartItems.contains(product), isTablet = isTablet)
             }
         }
     }
 }
 
 @Composable
-fun ProductItem(product: Product, onProductClick: (Product) -> Unit, onAddToCart: (Product) -> Unit, isInCart: Boolean) {
+fun ProductItem(product: Product, onProductClick: (Product) -> Unit, onAddToCart: (Product) -> Unit, isInCart: Boolean, isTablet: Boolean) {
     val orangeColor = Color(0xFFFFA500) // Определение оранжевого цвета
     val grayColor = Color.Gray // Определение серого цвета
 
@@ -101,7 +105,7 @@ fun ProductItem(product: Product, onProductClick: (Product) -> Unit, onAddToCart
                 AsyncImage(
                     model = product.imageUrl,
                     contentDescription = null,
-                    modifier = Modifier.size(80.dp)
+                    modifier = Modifier.size(if (isTablet) 120.dp else 80.dp)
                 )
             }
             Button(
@@ -117,10 +121,14 @@ fun ProductItem(product: Product, onProductClick: (Product) -> Unit, onAddToCart
     }
 }
 
+
 @Composable
 fun ProductDetailScreen(product: Product, onBackClick: () -> Unit, onAddToCart: (Product) -> Unit, isInCart: Boolean) {
     val orangeColor = Color(0xFFFFA500) // Определение оранжевого цвета
     val grayColor = Color.Gray // Определение серого цвета
+
+    val configuration = LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp > 600
 
     Column(
         modifier = Modifier
@@ -136,7 +144,7 @@ fun ProductDetailScreen(product: Product, onBackClick: () -> Unit, onAddToCart: 
             model = product.imageUrl,
             contentDescription = null,
             modifier = Modifier
-                .size(200.dp)
+                .size(if (isTablet) 300.dp else 200.dp)
                 .align(Alignment.CenterHorizontally)
         )
         Text(text = product.name, style = MaterialTheme.typography.headlineMedium)
@@ -153,4 +161,5 @@ fun ProductDetailScreen(product: Product, onBackClick: () -> Unit, onAddToCart: 
         }
     }
 }
+
 
