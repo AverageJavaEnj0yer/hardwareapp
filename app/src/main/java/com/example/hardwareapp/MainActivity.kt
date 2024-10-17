@@ -25,11 +25,14 @@ import androidx.compose.foundation.clickable
 import com.example.hardwareapp.data.User
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.google.accompanist.pager.ExperimentalPagerApi
+import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import com.example.hardwareapp.data.ProductDao
 
 import kotlinx.coroutines.runBlocking
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+
 
 
 class MainActivity : ComponentActivity() {
@@ -157,15 +160,15 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
 @Composable
 fun ComponentCatalogScreen(onCategoryClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val categories = listOf(
-        "Видеокарты",
-        "Процессоры",
-        "Материнские платы",
-        "Оперативная память",
-        "Блоки питания",
-        "Корпуса",
-        "Системы охлаждения",
-        "SSD",
-        "Жесткие диски"
+        "Видеокарты" to "https://imgproxy.onliner.by/POWetnFg-sSHoRExGJim_d8CrOu4bZFJJPy12kO7_uE/w:700/h:550/f:jpg/aHR0cHM6Ly9jb250/ZW50Lm9ubGluZXIu/YnkvY2F0YWxvZy9k/ZXZpY2UvbGFyZ2Uv/NmU1ZjYxMWExNmQ3/ZmY4ZjQ0YzhkN2M1/NzUyNGQ2NzkuanBn",
+        "Процессоры" to "https://imgproxy.onliner.by/CnM8oURZJbQugjzfALlpfEcnzobOhZU7yBjQGYt1Ygg/w:170/h:250/f:jpg/aHR0cHM6Ly9jb250/ZW50Lm9ubGluZXIu/YnkvY2F0YWxvZy9k/ZXZpY2Uvb3JpZ2lu/YWwvMzIwMTQ2YWU3/NTAxMDliMGQwMTU2/ZTMyZWY3NTRhNzIu/anBn",
+        "Материнские платы" to "https://imgproxy.onliner.by/T8-z4Bhw5S9Wz1GqWSWjuubEJvrjE3eIXGLYp_YWPag/w:700/h:550/f:jpg/aHR0cHM6Ly9jb250/ZW50Lm9ubGluZXIu/YnkvY2F0YWxvZy9k/ZXZpY2UvbGFyZ2Uv/ODg2NmQzNTQ5MWZh/OWNmNDAwMWQxY2M3/OTcwNWFhZmIuanBl/Zw",
+        "Оперативная память" to "https://imgproxy.onliner.by/9wXdmYF30dlqFxTryGDGlIkHzrgAVCQPDO-MSpZwWmo/w:700/h:550/f:jpg/aHR0cHM6Ly9jb250/ZW50Lm9ubGluZXIu/YnkvY2F0YWxvZy9k/ZXZpY2UvbGFyZ2Uv/ZjVjNTkxNjA5MzFk/NDg1MGM0ZjRiOWNi/NDMyOGI2YWUuanBl/Zw",
+        "Блоки питания" to "https://imgproxy.onliner.by/LzNTO8GrLKzAtHGOzzrPD4Yb2TzzDaCkGBFZDH14Td8/w:700/h:550/f:jpg/aHR0cHM6Ly9jb250/ZW50Lm9ubGluZXIu/YnkvY2F0YWxvZy9k/ZXZpY2UvbGFyZ2Uv/YjEzZTgzM2M3NTVk/MzlhYjc3ZDkzMGVh/MjlmZjRlMjUuanBl/Zw",
+        "Корпуса" to "https://imgproxy.onliner.by/ZteIZsL1VtHAeYIp4quOGsv-rbQNNoryrUF71DJ9xZA/w:700/h:550/f:jpg/aHR0cHM6Ly9jb250/ZW50Lm9ubGluZXIu/YnkvY2F0YWxvZy9k/ZXZpY2UvbGFyZ2Uv/MTQ0YTE0OTFiNzBm/MTUyNjA5YjMwNzJi/NThmNTJlYWYuanBn",
+        "Системы охлаждения" to "https://imgproxy.onliner.by/kTaVmTJkPk-HBoAfsKyfPMs_IyscqDgEXtVzkZdzKWM/w:700/h:550/f:jpg/aHR0cHM6Ly9jb250/ZW50Lm9ubGluZXIu/YnkvY2F0YWxvZy9k/ZXZpY2UvbGFyZ2Uv/NmIzMzA3ZTNmN2Vm/MzgxMWMxYjgyOGE0/ZDFlYWVkYmMuanBn",
+        "SSD" to "https://imgproxy.onliner.by/ppxjL-5KML7YrWugUgR6bLgJHHPs43fpSiqnp4sA8x8/w:700/h:550/f:jpg/aHR0cHM6Ly9jb250/ZW50Lm9ubGluZXIu/YnkvY2F0YWxvZy9k/ZXZpY2UvbGFyZ2Uv/YWQ5MDQ4YzFjOGVk/OWJhMDdjNzllZTA3/MDZjN2NmZWYuanBl/Zw",
+        "Жесткие диски" to "https://imgproxy.onliner.by/ZHslhqhfDo3T3wjsSAmJDXT06HGPGHkaejBTpCvlMe4/w:700/h:550/f:jpg/aHR0cHM6Ly9jb250/ZW50Lm9ubGluZXIu/YnkvY2F0YWxvZy9k/ZXZpY2UvbGFyZ2Uv/NWI2OGYwYjEzNTE4/NjU5MDgxNTRhOGFh/NDM0MmRkNWYuanBn"
     )
 
     LazyColumn(
@@ -174,30 +177,40 @@ fun ComponentCatalogScreen(onCategoryClick: (String) -> Unit, modifier: Modifier
         modifier = modifier.fillMaxSize()
     ) {
         items(categories.size) { index ->
-            CategoryCard(category = categories[index], onClick = { onCategoryClick(categories[index]) })
+            val (category, imageUrl) = categories[index]
+            CategoryCard(category = category, imageUrl = imageUrl, onClick = { onCategoryClick(category) })
         }
     }
 }
 
 @Composable
-fun CategoryCard(category: String, onClick: () -> Unit) {
+fun CategoryCard(category: String, imageUrl: String, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp)
+            .height(80.dp)
             .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxSize()
         ) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(60.dp)
+                    .padding(start = 16.dp)
+            )
             Text(
                 text = category,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(16.dp)
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(start = 16.dp)
             )
         }
     }
