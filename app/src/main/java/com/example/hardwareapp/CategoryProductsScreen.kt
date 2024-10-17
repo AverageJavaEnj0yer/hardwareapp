@@ -11,9 +11,14 @@ import androidx.compose.ui.unit.dp
 import com.example.hardwareapp.data.Product
 import com.example.hardwareapp.data.ProductDao
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 
 @Composable
-fun CategoryProductsScreen(category: String, productDao: ProductDao) {
+fun CategoryProductsScreen(category: String, productDao: ProductDao, onBackClick: () -> Unit) {
     var products by remember { mutableStateOf(emptyList<Product>()) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -30,7 +35,16 @@ fun CategoryProductsScreen(category: String, productDao: ProductDao) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Товары в категории: $category", style = MaterialTheme.typography.headlineMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBackClick) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+            }
+            Text("Товары в категории: $category", style = MaterialTheme.typography.headlineMedium)
+        }
 
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
@@ -43,6 +57,8 @@ fun CategoryProductsScreen(category: String, productDao: ProductDao) {
         }
     }
 }
+
+
 
 @Composable
 fun ProductItem(product: Product) {

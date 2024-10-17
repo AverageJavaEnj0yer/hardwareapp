@@ -63,14 +63,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun MainScreen(userDao: UserDao, productDao: ProductDao) {
     var isLoggedIn by remember { mutableStateOf(false) }
     var isRegistration by remember { mutableStateOf(false) }
     var currentUser by remember { mutableStateOf<User?>(null) }
     var isAddingProduct by remember { mutableStateOf(false) }
-    var selectedCategory by remember { mutableStateOf("Видеокарты") }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
 
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
@@ -85,6 +84,14 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
                     isAddingProduct = false
                 },
                 productDao = productDao
+            )
+        } else if (selectedCategory != null) {
+            CategoryProductsScreen(
+                category = selectedCategory!!,
+                productDao = productDao,
+                onBackClick = {
+                    selectedCategory = null
+                }
             )
         } else {
             Scaffold(
@@ -104,11 +111,8 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
                     when (page) {
                         0 -> ComponentCatalogScreen(onCategoryClick = { category ->
                             selectedCategory = category
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(1)
-                            }
                         })
-                        1 -> CategoryProductsScreen(category = selectedCategory, productDao = productDao)
+                        1 -> CartScreen()
                         2 -> currentUser?.let { user ->
                             UserProfileScreen(
                                 user = user,
@@ -223,6 +227,7 @@ fun NavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     }
 }
 
+
 @Composable
 fun CartScreen(modifier: Modifier = Modifier) {
     Text(
@@ -234,6 +239,7 @@ fun CartScreen(modifier: Modifier = Modifier) {
         fontSize = 20.sp
     )
 }
+
 
 data class ComponentCategory(val name: String)
 
