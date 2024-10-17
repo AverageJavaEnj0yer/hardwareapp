@@ -76,39 +76,51 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
     val coroutineScope = rememberCoroutineScope()
 
     if (isLoggedIn) {
-        Scaffold(
-            bottomBar = {
-                NavigationBar(selectedTab = pagerState.currentPage) { page ->
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(page)
+        if (isAddingProduct) {
+            AddProductScreen(
+                onProductAdded = {
+                    isAddingProduct = false
+                },
+                onBackClick = {
+                    isAddingProduct = false
+                },
+                productDao = productDao
+            )
+        } else {
+            Scaffold(
+                bottomBar = {
+                    NavigationBar(selectedTab = pagerState.currentPage) { page ->
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(page)
+                        }
                     }
                 }
-            }
-        ) { paddingValues ->
-            HorizontalPager(
-                count = 3,
-                state = pagerState,
-                modifier = Modifier.padding(paddingValues)
-            ) { page ->
-                when (page) {
-                    0 -> ComponentCatalogScreen(onCategoryClick = { category ->
-                        selectedCategory = category
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(1)
-                        }
-                    })
-                    1 -> CategoryProductsScreen(category = selectedCategory, productDao = productDao)
-                    2 -> currentUser?.let { user ->
-                        UserProfileScreen(
-                            user = user,
-                            onLogout = {
-                                isLoggedIn = false
-                                currentUser = null
-                            },
-                            onAddProductClick = {
-                                isAddingProduct = true
+            ) { paddingValues ->
+                HorizontalPager(
+                    count = 3,
+                    state = pagerState,
+                    modifier = Modifier.padding(paddingValues)
+                ) { page ->
+                    when (page) {
+                        0 -> ComponentCatalogScreen(onCategoryClick = { category ->
+                            selectedCategory = category
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(1)
                             }
-                        )
+                        })
+                        1 -> CategoryProductsScreen(category = selectedCategory, productDao = productDao)
+                        2 -> currentUser?.let { user ->
+                            UserProfileScreen(
+                                user = user,
+                                onLogout = {
+                                    isLoggedIn = false
+                                    currentUser = null
+                                },
+                                onAddProductClick = {
+                                    isAddingProduct = true
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -135,15 +147,6 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
                 userDao = userDao
             )
         }
-    }
-
-    if (isAddingProduct) {
-        AddProductScreen(
-            onProductAdded = {
-                isAddingProduct = false
-            },
-            productDao = productDao
-        )
     }
 }
 
@@ -219,7 +222,6 @@ fun NavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
         )
     }
 }
-
 
 @Composable
 fun CartScreen(modifier: Modifier = Modifier) {

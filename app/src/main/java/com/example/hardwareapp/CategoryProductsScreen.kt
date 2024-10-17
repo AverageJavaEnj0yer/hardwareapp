@@ -43,3 +43,22 @@ fun CategoryProductsScreen(category: String, productDao: ProductDao) {
         }
     }
 }
+
+@Composable
+fun ProductItem(product: Product) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(text = product.name, style = MaterialTheme.typography.titleMedium)
+            Text(text = "Цена: ${product.price}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Описание: ${product.description}", style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}

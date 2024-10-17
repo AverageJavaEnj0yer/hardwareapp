@@ -2,9 +2,8 @@ package com.example.hardwareapp
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,7 +15,7 @@ import com.example.hardwareapp.data.ProductDao
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddProductScreen(onProductAdded: () -> Unit, productDao: ProductDao) {
+fun AddProductScreen(onProductAdded: () -> Unit, onBackClick: () -> Unit, productDao: ProductDao) {
     var name by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -37,7 +36,6 @@ fun AddProductScreen(onProductAdded: () -> Unit, productDao: ProductDao) {
 
     var expanded by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf(categories[0]) }
-    var products by remember { mutableStateOf(emptyList<Product>()) }
 
     Column(
         modifier = Modifier
@@ -46,6 +44,13 @@ fun AddProductScreen(onProductAdded: () -> Unit, productDao: ProductDao) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        IconButton(onClick = onBackClick) {
+            Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = null
+            )
+        }
+
         Text("Добавить товар", style = MaterialTheme.typography.headlineMedium)
 
         // Выпадающий список для выбора категории
@@ -75,9 +80,6 @@ fun AddProductScreen(onProductAdded: () -> Unit, productDao: ProductDao) {
                         onClick = {
                             selectedCategory = category
                             expanded = false
-                            coroutineScope.launch {
-                                products = productDao.getProductsByCategory(category)
-                            }
                         }
                     )
                 }
@@ -130,38 +132,6 @@ fun AddProductScreen(onProductAdded: () -> Unit, productDao: ProductDao) {
         if (errorMessage.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Товары в категории: $selectedCategory", style = MaterialTheme.typography.headlineMedium)
-
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(products) { product ->
-                ProductItem(product = product)
-            }
-        }
-    }
-}
-
-@Composable
-fun ProductItem(product: Product) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(text = product.name, style = MaterialTheme.typography.titleMedium)
-            Text(text = "Цена: ${product.price}", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "Описание: ${product.description}", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
