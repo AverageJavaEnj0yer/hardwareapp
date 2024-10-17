@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.example.hardwareapp.data.Order
 import com.example.hardwareapp.data.Product
@@ -25,10 +26,14 @@ fun CheckoutScreen(
     var expiryDate by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(if (screenWidth > 600.dp) 32.dp else 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -39,7 +44,8 @@ fun CheckoutScreen(
         OutlinedTextField(
             value = cardNumber,
             onValueChange = { cardNumber = it },
-            label = { Text("Номер карты") }
+            label = { Text("Номер карты") },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -47,7 +53,8 @@ fun CheckoutScreen(
         OutlinedTextField(
             value = cvv,
             onValueChange = { cvv = it },
-            label = { Text("CVV") }
+            label = { Text("CVV") },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -55,7 +62,8 @@ fun CheckoutScreen(
         OutlinedTextField(
             value = expiryDate,
             onValueChange = { expiryDate = it },
-            label = { Text("Срок действия карты") }
+            label = { Text("Срок действия карты") },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))

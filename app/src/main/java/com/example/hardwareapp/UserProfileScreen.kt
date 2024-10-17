@@ -11,8 +11,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.hardwareapp.data.User
-
-
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
@@ -22,8 +20,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 import org.json.JSONObject
-
-
+import androidx.compose.ui.platform.LocalConfiguration
 
 @Composable
 fun UserProfileScreen(
@@ -42,6 +39,9 @@ fun UserProfileScreen(
         }
     }
 
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+
     val primaryColor = Color(0xFF6200EE) // Primary purple color
     val textColor = Color(0xFF000000) // Black text color
     val secondaryTextColor = Color(0xFF757575) // Gray text color
@@ -49,7 +49,7 @@ fun UserProfileScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(if (screenWidth > 600.dp) 32.dp else 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -60,7 +60,7 @@ fun UserProfileScreen(
         ) {
             Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(if (screenWidth > 600.dp) 120.dp else 100.dp)
                     .background(
                         shape = RoundedCornerShape(12.dp),
                         color = primaryColor.copy(alpha = 0.2f)

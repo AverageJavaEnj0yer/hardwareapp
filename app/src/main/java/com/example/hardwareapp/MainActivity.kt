@@ -34,6 +34,7 @@ import com.example.hardwareapp.data.ProductDao
 import kotlinx.coroutines.runBlocking
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 
 class MainActivity : ComponentActivity() {
     private lateinit var userDao: UserDao
@@ -83,6 +84,10 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
 
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
 
     fun addToCart(product: Product) {
         coroutineScope.launch {
@@ -249,11 +254,14 @@ fun ComponentCatalogScreen(onCategoryClick: (String) -> Unit, modifier: Modifier
 
 @Composable
 fun CategoryCard(category: String, imageUrl: String, onClick: () -> Unit) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .height(if (screenWidth > 600.dp) 100.dp else 80.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = Color.White
@@ -268,7 +276,7 @@ fun CategoryCard(category: String, imageUrl: String, onClick: () -> Unit) {
                 model = imageUrl,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(if (screenWidth > 600.dp) 80.dp else 60.dp)
                     .padding(start = 16.dp)
             )
             Text(
@@ -304,7 +312,6 @@ fun NavigationBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     }
 }
 
-
 @Composable
 fun CartScreen(modifier: Modifier = Modifier) {
     Text(
@@ -316,7 +323,6 @@ fun CartScreen(modifier: Modifier = Modifier) {
         fontSize = 20.sp
     )
 }
-
 
 data class ComponentCategory(val name: String)
 
