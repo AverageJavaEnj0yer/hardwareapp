@@ -19,6 +19,7 @@ fun AddProductScreen(onProductAdded: () -> Unit, onBackClick: () -> Unit, produc
     var name by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var imageUrl by remember { mutableStateOf("") } // Новое поле для ссылки на изображение
     var errorMessage by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
@@ -105,9 +106,15 @@ fun AddProductScreen(onProductAdded: () -> Unit, onBackClick: () -> Unit, produc
             label = { Text("Описание") }
         )
         Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = imageUrl,
+            onValueChange = { imageUrl = it },
+            label = { Text("Ссылка на изображение") }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
-            if (selectedCategory.isEmpty() || name.isEmpty() || price.isEmpty() || description.isEmpty()) {
+            if (selectedCategory.isEmpty() || name.isEmpty() || price.isEmpty() || description.isEmpty() || imageUrl.isEmpty()) {
                 errorMessage = "Пожалуйста, заполните все поля"
             } else {
                 coroutineScope.launch {
@@ -116,7 +123,8 @@ fun AddProductScreen(onProductAdded: () -> Unit, onBackClick: () -> Unit, produc
                             category = selectedCategory,
                             name = name,
                             price = price.toDouble(),
-                            description = description
+                            description = description,
+                            imageUrl = imageUrl // Добавление ссылки на изображение
                         )
                         productDao.insert(product)
                         onProductAdded()

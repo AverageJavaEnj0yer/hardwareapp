@@ -77,6 +77,8 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:0.31.3-beta")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.31.3-beta")
 
+    implementation ("io.coil-kt:coil-compose:2.1.0")
+
     // Зависимости Room
     implementation(libs.androidx.room.runtime) // Основная зависимость Room
     implementation(libs.androidx.room.ktx) // Зависимость для корутин

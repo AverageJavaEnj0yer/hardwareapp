@@ -16,6 +16,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import coil.compose.AsyncImage
+
 
 @Composable
 fun CategoryProductsScreen(category: String, productDao: ProductDao, onBackClick: () -> Unit) {
@@ -57,9 +60,6 @@ fun CategoryProductsScreen(category: String, productDao: ProductDao, onBackClick
         }
     }
 }
-
-
-
 @Composable
 fun ProductItem(product: Product) {
     Card(
@@ -72,6 +72,13 @@ fun ProductItem(product: Product) {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            AsyncImage(
+                model = product.imageUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(100.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
             Text(text = product.name, style = MaterialTheme.typography.titleMedium)
             Text(text = "Цена: ${product.price}", style = MaterialTheme.typography.bodyMedium)
             Text(text = "Описание: ${product.description}", style = MaterialTheme.typography.bodyMedium)
