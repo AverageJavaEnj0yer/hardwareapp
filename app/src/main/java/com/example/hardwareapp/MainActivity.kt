@@ -79,6 +79,7 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
     var cartItems by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var isCheckout by remember { mutableStateOf(false) }
 
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
@@ -97,6 +98,11 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
         }
     }
 
+    fun onCheckoutComplete() {
+        isCheckout = false
+        cartItems = emptyList()
+    }
+
     if (isLoggedIn) {
         if (isAddingProduct) {
             AddProductScreen(
@@ -108,6 +114,15 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
                 },
                 productDao = productDao,
                 userDao = userDao
+            )
+        } else if (isCheckout) {
+            CheckoutScreen(
+                userDao = userDao,
+                currentUser = currentUser!!,
+                cartItems = cartItems,
+                onCheckoutComplete = {
+                    onCheckoutComplete()
+                }
             )
         } else if (selectedProduct != null) {
             ProductDetailScreen(
@@ -161,11 +176,12 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
                                 removeFromCart(product)
                             },
                             onCheckout = {
-                                // Logic for checkout
+                                isCheckout = true
                             }
                         )
                         2 -> currentUser?.let { user ->
                             UserProfileScreen(
+                                userDao = userDao,
                                 user = user,
                                 onLogout = {
                                     isLoggedIn = false

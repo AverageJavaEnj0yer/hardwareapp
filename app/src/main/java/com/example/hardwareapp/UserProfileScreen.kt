@@ -12,13 +12,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.hardwareapp.data.User
 
+
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.*
+import com.example.hardwareapp.data.Order
+import com.example.hardwareapp.data.UserDao
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
+
 @Composable
 fun UserProfileScreen(
+    userDao: UserDao,
     user: User,
     onLogout: () -> Unit,
     onAddProductClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var orders by remember { mutableStateOf(emptyList<Order>()) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(user) {
+        coroutineScope.launch {
+            orders = userDao.getOrdersByUserId(user.id)
+        }
+    }
+
     val primaryColor = Color(0xFF6200EE) // Primary purple color
     val textColor = Color(0xFF000000) // Black text color
     val secondaryTextColor = Color(0xFF757575) // Gray text color
@@ -89,8 +109,43 @@ fun UserProfileScreen(
 
         Text("История заказов:", style = MaterialTheme.typography.titleMedium)
 
-        // Здесь можно добавить проверку на пустую историю заказов
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Здесь пока ничего нет", style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+        if (orders.isEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Здесь пока ничего нет", style = MaterialTheme.typography.bodyMedium.copy(color = secondaryTextColor))
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(orders) { order ->
+                    OrderItem(order = order)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun OrderItem(order: Order) {
+    val dateFormat = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault())
+    val formattedDate = dateFormat.format(order.timestamp)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text("Заказ №${order.id}", style = MaterialTheme.typography.titleMedium)
+            Text("Дата: $formattedDate", style = MaterialTheme.typography.bodyMedium)
+            Text("Общая стоимость: ${order.totalPrice} BYN", style = MaterialTheme.typography.bodyMedium)
+            Text("Детали заказа: ${order.orderDetails}", style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }
