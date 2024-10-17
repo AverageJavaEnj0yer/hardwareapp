@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Transaction
 
 @Dao
 interface UserDao {
@@ -19,4 +20,14 @@ interface UserDao {
 
     @Update
     suspend fun updateUser(user: User)
+
+    @Transaction
+    @Query("SELECT * FROM Product WHERE id IN (SELECT productId FROM cart WHERE userId = :userId)")
+    suspend fun getCartProducts(userId: Int): List<Product>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addToCart(cart: Cart)
+
+    @Query("DELETE FROM cart WHERE userId = :userId AND productId = :productId")
+    suspend fun removeFromCart(userId: Int, productId: Int)
 }

@@ -17,9 +17,27 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.filled.Delete
+import com.example.hardwareapp.data.UserDao
+import com.example.hardwareapp.data.User
+import kotlinx.coroutines.launch
+
 
 @Composable
-fun CartScreen(cartItems: List<Product>, onRemoveFromCart: (Product) -> Unit, onCheckout: () -> Unit) {
+fun CartScreen(
+    userDao: UserDao,
+    currentUser: User,
+    onRemoveFromCart: (Product) -> Unit,
+    onCheckout: () -> Unit
+) {
+    var cartItems by remember { mutableStateOf(emptyList<Product>()) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(currentUser) {
+        coroutineScope.launch {
+            cartItems = userDao.getCartProducts(currentUser.id)
+        }
+    }
+
     val orangeColor = Color(0xFFFFA500) // Определение оранжевого цвета
     val totalPrice = cartItems.sumOf { it.price }
 
@@ -41,7 +59,12 @@ fun CartScreen(cartItems: List<Product>, onRemoveFromCart: (Product) -> Unit, on
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(cartItems) { product ->
-                    CartItem(product = product, onRemoveFromCart = onRemoveFromCart)
+                    CartItem(product = product, onRemoveFromCart = {
+                        coroutineScope.launch {
+                            userDao.removeFromCart(currentUser.id, product.id)
+                            cartItems = userDao.getCartProducts(currentUser.id)
+                        }
+                    })
                 }
             }
 

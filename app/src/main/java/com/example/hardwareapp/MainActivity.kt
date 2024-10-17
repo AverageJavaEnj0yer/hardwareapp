@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
 import com.example.hardwareapp.data.User
+import com.example.hardwareapp.data.Cart
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import coil.compose.AsyncImage
@@ -60,7 +61,11 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            MainScreen(userDao, productDao)
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    MainScreen(userDao, productDao)
+                }
+            }
         }
     }
 }
@@ -79,11 +84,17 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
     val coroutineScope = rememberCoroutineScope()
 
     fun addToCart(product: Product) {
-        cartItems = cartItems + product
+        coroutineScope.launch {
+            userDao.addToCart(Cart(userId = currentUser!!.id, productId = product.id))
+            cartItems = userDao.getCartProducts(currentUser!!.id)
+        }
     }
 
     fun removeFromCart(product: Product) {
-        cartItems = cartItems - product
+        coroutineScope.launch {
+            userDao.removeFromCart(currentUser!!.id, product.id)
+            cartItems = userDao.getCartProducts(currentUser!!.id)
+        }
     }
 
     if (isLoggedIn) {
@@ -95,7 +106,8 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
                 onBackClick = {
                     isAddingProduct = false
                 },
-                productDao = productDao
+                productDao = productDao,
+                userDao = userDao
             )
         } else if (selectedProduct != null) {
             ProductDetailScreen(
@@ -143,7 +155,8 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
                             selectedCategory = category
                         })
                         1 -> CartScreen(
-                            cartItems = cartItems,
+                            userDao = userDao,
+                            currentUser = currentUser!!,
                             onRemoveFromCart = { product ->
                                 removeFromCart(product)
                             },
@@ -191,7 +204,6 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
         }
     }
 }
-
 @Composable
 fun ComponentCatalogScreen(onCategoryClick: (String) -> Unit, modifier: Modifier = Modifier) {
     val categories = listOf(

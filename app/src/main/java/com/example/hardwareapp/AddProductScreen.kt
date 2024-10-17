@@ -12,10 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.hardwareapp.data.Product
 import com.example.hardwareapp.data.ProductDao
+import com.example.hardwareapp.data.UserDao
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddProductScreen(onProductAdded: () -> Unit, onBackClick: () -> Unit, productDao: ProductDao) {
+fun AddProductScreen(onProductAdded: () -> Unit, onBackClick: () -> Unit, productDao: ProductDao, userDao: UserDao) {
     var name by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
