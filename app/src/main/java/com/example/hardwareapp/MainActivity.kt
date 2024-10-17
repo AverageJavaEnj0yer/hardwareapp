@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.room.Room
 import com.example.hardwareapp.data.AppDatabase
 import com.example.hardwareapp.data.UserDao
+import com.example.hardwareapp.data.Product
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
@@ -73,6 +74,7 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
     var currentUser by remember { mutableStateOf<User?>(null) }
     var isAddingProduct by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var selectedProduct by remember { mutableStateOf<Product?>(null) }
 
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
@@ -88,12 +90,22 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
                 },
                 productDao = productDao
             )
+        } else if (selectedProduct != null) {
+            ProductDetailScreen(
+                product = selectedProduct!!,
+                onBackClick = {
+                    selectedProduct = null
+                }
+            )
         } else if (selectedCategory != null) {
             CategoryProductsScreen(
                 category = selectedCategory!!,
                 productDao = productDao,
                 onBackClick = {
                     selectedCategory = null
+                },
+                onProductClick = { product ->
+                    selectedProduct = product
                 }
             )
         } else {

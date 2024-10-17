@@ -18,10 +18,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import coil.compose.AsyncImage
-
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
-fun CategoryProductsScreen(category: String, productDao: ProductDao, onBackClick: () -> Unit) {
+fun CategoryProductsScreen(
+    category: String,
+    productDao: ProductDao,
+    onBackClick: () -> Unit,
+    onProductClick: (Product) -> Unit
+) {
     var products by remember { mutableStateOf(emptyList<Product>()) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -55,33 +62,91 @@ fun CategoryProductsScreen(category: String, productDao: ProductDao, onBackClick
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(products) { product ->
-                ProductItem(product = product)
+                ProductItem(product = product, onProductClick = onProductClick)
             }
         }
     }
 }
+
 @Composable
-fun ProductItem(product: Product) {
+fun ProductItem(product: Product, onProductClick: (Product) -> Unit) {
+    val orangeColor = Color(0xFFFFA500) // Определение оранжевого цвета
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+            .padding(8.dp)
+            .clickable { onProductClick(product) },
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            AsyncImage(
-                model = product.imageUrl,
-                contentDescription = null,
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(text = product.name, style = MaterialTheme.typography.titleMedium)
+                    Text(text = "${product.price} BYN", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
+                }
+                AsyncImage(
+                    model = product.imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier.size(80.dp)
+                )
+            }
+            Button(
+                onClick = { /* Add to cart logic here */ },
+                colors = ButtonDefaults.buttonColors(containerColor = orangeColor),
                 modifier = Modifier
-                    .size(100.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-            Text(text = product.name, style = MaterialTheme.typography.titleMedium)
-            Text(text = "Цена: ${product.price}", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "Описание: ${product.description}", style = MaterialTheme.typography.bodyMedium)
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) {
+                Text("В корзину", color = Color.White)
+            }
         }
     }
 }
+
+@Composable
+fun ProductDetailScreen(product: Product, onBackClick: () -> Unit) {
+    val orangeColor = Color(0xFFFFA500) // Определение оранжевого цвета
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        IconButton(onClick = onBackClick) {
+            Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+        }
+        AsyncImage(
+            model = product.imageUrl,
+            contentDescription = null,
+            modifier = Modifier
+                .size(200.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+        Text(text = product.name, style = MaterialTheme.typography.headlineMedium)
+        Text(text = "${product.price} BYN", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
+        Text(text = "Описание: ${product.description}", style = MaterialTheme.typography.bodyMedium)
+        Button(
+            onClick = { /* Add to cart logic here */ },
+            colors = ButtonDefaults.buttonColors(containerColor = orangeColor),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
+            Text("В корзину", color = Color.White)
+        }
+    }
+}
+
