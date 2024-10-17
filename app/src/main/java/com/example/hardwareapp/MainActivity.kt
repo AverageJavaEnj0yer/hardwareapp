@@ -34,8 +34,6 @@ import kotlinx.coroutines.runBlocking
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-
-
 class MainActivity : ComponentActivity() {
     private lateinit var userDao: UserDao
     private lateinit var productDao: ProductDao
@@ -75,9 +73,18 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
     var isAddingProduct by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
+    var cartItems by remember { mutableStateOf<List<Product>>(emptyList()) }
 
     val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
+
+    fun addToCart(product: Product) {
+        cartItems = cartItems + product
+    }
+
+    fun removeFromCart(product: Product) {
+        cartItems = cartItems - product
+    }
 
     if (isLoggedIn) {
         if (isAddingProduct) {
@@ -95,7 +102,11 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
                 product = selectedProduct!!,
                 onBackClick = {
                     selectedProduct = null
-                }
+                },
+                onAddToCart = { product ->
+                    addToCart(product)
+                },
+                isInCart = cartItems.contains(selectedProduct)
             )
         } else if (selectedCategory != null) {
             CategoryProductsScreen(
@@ -106,7 +117,11 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
                 },
                 onProductClick = { product ->
                     selectedProduct = product
-                }
+                },
+                onAddToCart = { product ->
+                    addToCart(product)
+                },
+                cartItems = cartItems
             )
         } else {
             Scaffold(
@@ -127,7 +142,15 @@ fun MainScreen(userDao: UserDao, productDao: ProductDao) {
                         0 -> ComponentCatalogScreen(onCategoryClick = { category ->
                             selectedCategory = category
                         })
-                        1 -> CartScreen()
+                        1 -> CartScreen(
+                            cartItems = cartItems,
+                            onRemoveFromCart = { product ->
+                                removeFromCart(product)
+                            },
+                            onCheckout = {
+                                // Logic for checkout
+                            }
+                        )
                         2 -> currentUser?.let { user ->
                             UserProfileScreen(
                                 user = user,

@@ -27,7 +27,9 @@ fun CategoryProductsScreen(
     category: String,
     productDao: ProductDao,
     onBackClick: () -> Unit,
-    onProductClick: (Product) -> Unit
+    onProductClick: (Product) -> Unit,
+    onAddToCart: (Product) -> Unit,
+    cartItems: List<Product>
 ) {
     var products by remember { mutableStateOf(emptyList<Product>()) }
     val coroutineScope = rememberCoroutineScope()
@@ -62,15 +64,16 @@ fun CategoryProductsScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(products) { product ->
-                ProductItem(product = product, onProductClick = onProductClick)
+                ProductItem(product = product, onProductClick = onProductClick, onAddToCart = onAddToCart, isInCart = cartItems.contains(product))
             }
         }
     }
 }
 
 @Composable
-fun ProductItem(product: Product, onProductClick: (Product) -> Unit) {
+fun ProductItem(product: Product, onProductClick: (Product) -> Unit, onAddToCart: (Product) -> Unit, isInCart: Boolean) {
     val orangeColor = Color(0xFFFFA500) // Определение оранжевого цвета
+    val grayColor = Color.Gray // Определение серого цвета
 
     Card(
         modifier = Modifier
@@ -102,21 +105,22 @@ fun ProductItem(product: Product, onProductClick: (Product) -> Unit) {
                 )
             }
             Button(
-                onClick = { /* Add to cart logic here */ },
-                colors = ButtonDefaults.buttonColors(containerColor = orangeColor),
+                onClick = { onAddToCart(product) },
+                colors = ButtonDefaults.buttonColors(containerColor = if (isInCart) grayColor else orangeColor),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp)
             ) {
-                Text("В корзину", color = Color.White)
+                Text(if (isInCart) "Уже в корзине" else "В корзину", color = Color.White)
             }
         }
     }
 }
 
 @Composable
-fun ProductDetailScreen(product: Product, onBackClick: () -> Unit) {
+fun ProductDetailScreen(product: Product, onBackClick: () -> Unit, onAddToCart: (Product) -> Unit, isInCart: Boolean) {
     val orangeColor = Color(0xFFFFA500) // Определение оранжевого цвета
+    val grayColor = Color.Gray // Определение серого цвета
 
     Column(
         modifier = Modifier
@@ -139,13 +143,13 @@ fun ProductDetailScreen(product: Product, onBackClick: () -> Unit) {
         Text(text = "${product.price} BYN", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
         Text(text = "Описание: ${product.description}", style = MaterialTheme.typography.bodyMedium)
         Button(
-            onClick = { /* Add to cart logic here */ },
-            colors = ButtonDefaults.buttonColors(containerColor = orangeColor),
+            onClick = { onAddToCart(product) },
+            colors = ButtonDefaults.buttonColors(containerColor = if (isInCart) grayColor else orangeColor),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp)
         ) {
-            Text("В корзину", color = Color.White)
+            Text(if (isInCart) "Уже в корзине" else "В корзину", color = Color.White)
         }
     }
 }
