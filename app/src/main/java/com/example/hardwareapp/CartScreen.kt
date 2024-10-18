@@ -40,7 +40,7 @@ fun CartScreen(
         }
     }
 
-    val totalPrice = NativeUtils().calculateTotalPrice(cartItems.map { it.price }.toDoubleArray(), cartItems.size)
+    val totalPrice = NativeUtils.calculateTotalPrice(cartItems.map { it.price }.toDoubleArray(), cartItems.size)
     val formattedTotalPrice = String.format("%.2f", totalPrice)
 
     val configuration = LocalConfiguration.current

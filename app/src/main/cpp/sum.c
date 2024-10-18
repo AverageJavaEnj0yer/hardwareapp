@@ -1,7 +1,7 @@
 #include <jni.h>
 
 JNIEXPORT jdouble JNICALL
-Java_com_example_hardwareapp_utils_NativeUtils_calculateTotalPrice(JNIEnv *env, jobject thiz, jdoubleArray prices, jint length) {
+Java_com_example_hardwareapp_utils_NativeUtils_calculateTotalPrice(JNIEnv *env, jclass clazz, jdoubleArray prices, jint length) {
     jdouble *pricesArray = (*env)->GetDoubleArrayElements(env, prices, NULL);
     jdouble total = 0.0;
 

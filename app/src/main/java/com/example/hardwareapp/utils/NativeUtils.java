@@ -5,5 +5,5 @@ public class NativeUtils {
         System.loadLibrary("native-lib");
     }
 
-    public native double calculateTotalPrice(double[] prices, int length);
+    public static native double calculateTotalPrice(double[] prices, int length);
 }
