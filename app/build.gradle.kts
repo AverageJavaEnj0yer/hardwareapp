@@ -20,8 +20,12 @@ android {
             useSupportLibrary = true
         }
 
-        // Отключение экспорта схемы, если не требуется
-        // exportSchema = false
+        // Настройки для CMake
+        externalNativeBuild {
+            cmake {
+                cppFlags.add("-std=c++11")
+            }
+        }
     }
 
     buildTypes {
@@ -55,6 +59,13 @@ android {
     // Настройки для Room
     kotlinOptions {
         freeCompilerArgs += "-X room.schemaLocation=${projectDir}/schemas"
+    }
+
+    // Настройки для CMake
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
     }
 }
 

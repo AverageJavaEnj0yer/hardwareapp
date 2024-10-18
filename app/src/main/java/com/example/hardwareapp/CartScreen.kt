@@ -22,6 +22,8 @@ import com.example.hardwareapp.data.UserDao
 import com.example.hardwareapp.data.User
 import kotlinx.coroutines.launch
 
+import com.example.hardwareapp.utils.NativeUtils
+
 @Composable
 fun CartScreen(
     userDao: UserDao,
@@ -38,8 +40,7 @@ fun CartScreen(
         }
     }
 
-    val orangeColor = Color(0xFFFFA500) // Определение оранжевого цвета
-    val totalPrice = cartItems.sumOf { it.price }
+    val totalPrice = NativeUtils().calculateTotalPrice(cartItems.map { it.price }.toDoubleArray(), cartItems.size)
     val formattedTotalPrice = String.format("%.2f", totalPrice)
 
     val configuration = LocalConfiguration.current
@@ -86,7 +87,7 @@ fun CartScreen(
 
             Button(
                 onClick = onCheckout,
-                colors = ButtonDefaults.buttonColors(containerColor = orangeColor),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFA500)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Оформить заказ", color = Color.White)
